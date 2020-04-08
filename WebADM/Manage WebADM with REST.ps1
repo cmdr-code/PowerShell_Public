@@ -102,6 +102,7 @@ function Get-WebADM-RandomBytes {
 		Return $Response.Result
 	}
 }
+
 function Get-WebADM-UserDN {
 <#
     .SYNOPSIS
@@ -139,7 +140,7 @@ function Get-WebADM-UserDN {
 	If ($Response.Error.Data -like 'Invalid Username or Password') {
 		Write-Error -Message 'Invalid Username or Password' -Category AuthenticationError
 	} elseif ($Response.Result -like 'False') {
-        Write-Error -Message "Cannot find any user with SamAccountName: $SamAccountName" -Category ObjectNotFound
+        	Write-Error -Message "Cannot find any user with SamAccountName: $SamAccountName" -Category ObjectNotFound
 	} Else {
 		Return $Response.Result
 	}

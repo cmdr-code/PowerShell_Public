@@ -17,7 +17,7 @@ $UserDN = Get-WebADM-UserDN -SamAccountName 'Username' -AuthHeader $AuthHeader
 $Result = Set-WebADM-ActivateUser -UserDN $UserDN -AuthHeader $AuthHeader
 
 ### Step 6 - Register TOTP in WebADM
-$Result = Set-WebADM-TOTPRegister -UserDN $UserDN -Key $Key -AuthHeaders $AuthHeader
+$Result = Set-WebADM-TOTPRegister -UserDN $UserDN -Key $Key -AuthHeader $AuthHeader
 
 ### Step 7 - Get TOTP URI from WebADM
 $URI = Get-WebADM-TOTPUri -Name 'Company OTP' -Key $Key -UserID 'Username' -Domain 'default' -AuthHeader $AuthHeader

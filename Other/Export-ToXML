@@ -1,0 +1,59 @@
+Function Out-HashTableToXml{ 
+# Taken from https://gallery.technet.microsoft.com/scriptcenter/Export-Hashtable-to-xml-in-122fda31
+[cmdletbinding()]
+    Param(
+        [ValidateNotNullOrEmpty()] 
+        [System.String]$Root,
+        [Parameter(ValueFromPipeline = $true, Position = 0)] 
+        [System.Collections.Hashtable]$InputObject, 
+        [ValidateScript({Test-Path $_ -IsValid})] 
+        [System.String]$Path 
+    ) 
+    Begin{ 
+        $ScriptBlock = { 
+            Param($Elem, $Root) 
+            if ($Elem.Value -is [Array]) { 
+                $Elem.Value | Foreach-Object { 
+                    $ScriptBlock.Invoke(@(@{$Elem.Key=$_}, $Root)) 
+                } 
+            } 
+            if( $Elem.Value -is [System.Collections.Hashtable] ){ 
+                $RootNode = $Root.AppendChild($Doc.CreateNode([System.Xml.XmlNodeType]::Element,$Elem.Key,$Null)) 
+                $Elem.Value.GetEnumerator() | ForEach-Object { 
+                    $Scriptblock.Invoke( @($_, $RootNode) ) 
+                } 
+            } 
+            else{ 
+                $Element = $Doc.CreateElement($Elem.Key) 
+                $Element.InnerText = if($Elem.Value -is [Array]) { 
+                    $Elem.Value -join ',' 
+                } 
+                else{ 
+                    $Elem.Value | Out-String 
+                } 
+                $Root.AppendChild($Element) | Out-Null     
+            } 
+        }     
+    } 
+    Process{ 
+        $Doc = [xml]"<$($Root)></$($Root)>" 
+        $InputObject.GetEnumerator() | ForEach-Object { 
+            $scriptblock.Invoke( @($_, $doc.DocumentElement) ) 
+        } 
+        $doc.Save($Path) 
+    }
+ }
+
+$Configuration = @{ 
+    'Firstname' = '' 
+    'Surname' = ''
+    'SamAccountName' = ''
+    'Company' = ''
+    'Detail' = '' 
+}
+
+$Configuration | Out-HashTableToXml -Root 'Configuration' -Path 'C:\Temp\Config.xml'
+
+[XML]$XML = Get-Content -Path 'C:\Temp\Config.xml'
+
+# $XML.Configuration.SamAccountName
